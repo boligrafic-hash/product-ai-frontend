@@ -1,5 +1,8 @@
-// API URL - apunta a tu backend
-const API_URL = 'http://localhost:3000';
+// API URL - Detecta automáticamente si estamos en desarrollo o producción
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : 'https://product-ai-backend.onrender.com';
+
 // Estado
 let currentUser = null;
 
