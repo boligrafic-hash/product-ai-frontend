@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Product Description Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ AI Product Description Generator</h1>
+            <p class="subtitle">Create compelling, SEO-friendly descriptions for your products</p>
+        </header>
+
+        <main>
+            <!-- Sección de login/registro -->
+            <div id="register-section" class="register-section">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" id="login-tab">Login</button>
+                    <button class="auth-tab" id="register-tab">Register</button>
+                </div>
+                
+                <!-- Mensajes de verificación -->
+                <div id="verification-message" class="verification-message" style="display: none;"></div>
+                
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form">
+                    <h2>Welcome Back</h2>
+                    <input type="email" id="login-email" placeholder="Your email" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form" style="display: none;">
+                    <h2>Create Account</h2>
+                    <input type="email" id="register-email" placeholder="Your email" required>
+                    <input type="password" id="register-password" placeholder="Password" required>
+                    <input type="text" id="register-name" placeholder="Your name (optional)">
+                    <button type="submit">Register</button>
+                </form>
+
+                <!-- Google Login -->
+                <div class="google-auth">
+                    <div class="divider">
+                        <span>or</span>
+                    </div>
+                    <a href="http://localhost:3000/auth/google" class="google-btn">
+                        <img src="https://www.gstatic.com/firebasejs/auth/ai/svg/google.svg" alt="Google" width="20">
+                        Sign in with Google
+                    </a>
+                </div>
+                
+                <!-- Planes -->
+                <div class="pricing-showcase">
+                    <h3>Choose your plan</h3>
+                    <div class="pricing-grid">
+                        <div class="pricing-card free">
+                            <h4>Free</h4>
+                            <p class="price">$0<span>/month</span></p>
+                            <ul>
+                                <li>✓ 5 descriptions/month</li>
+                                <li>✓ Basic history</li>
+                                <li>✓ Community support</li>
+                            </ul>
+                            <button class="pricing-btn" onclick="document.getElementById('login-email').focus()">Start Free</button>
+                        </div>
+                        
+                        <div class="pricing-card pro popular">
+                            <div class="popular-badge">Most Popular</div>
+                            <h4>Pro</h4>
+                            <p class="price">$9.99<span>/month</span></p>
+                            <ul>
+                                <li>✓ 50 descriptions/month</li>
+                                <li>✓ Full history</li>
+                                <li>✓ Email support</li>
+                                <li>✓ Priority processing</li>
+                            </ul>
+                            <button class="pricing-btn pro-btn" onclick="document.getElementById('login-email').focus()">Get Started</button>
+                        </div>
+                        
+                        <div class="pricing-card business">
+                            <h4>Business</h4>
+                            <p class="price">$29.99<span>/month</span></p>
+                            <ul>
+                                <li>✓ Unlimited descriptions</li>
+                                <li>✓ Full history</li>
+                                <li>✓ Export to CSV</li>
+                                <li>✓ Priority support</li>
+                                <li>✓ Team access (up to 3)</li>
+                            </ul>
+                            <button class="pricing-btn business-btn" onclick="document.getElementById('login-email').focus()">Contact Sales</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección principal (usuario logueado) -->
+            <div id="main-section" style="display: none;">
+                <div class="user-info">
+                    <span id="user-email"></span>
+                    <span id="user-plan" class="plan-badge">Free Plan</span>
+                    <button id="logout-btn" class="logout-btn">🚪 Salir</button>
+                </div>
+
+                <!-- Verificación pendiente (solo si no está verificado) -->
+                <div id="verification-pending" class="verification-pending" style="display: none;">
+                    <p>⚠️ Please verify your email. Check your inbox.</p>
+                    <button id="resend-verification-btn" class="secondary-btn">Resend verification email</button>
+                </div>
+
+                <!-- Límites de uso -->
+                <div class="usage-info" id="usage-info">
+                    <p>Descriptions used: <span id="usage-count">0</span> / <span id="usage-limit">5</span></p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Generador de descripciones -->
+                <div class="input-section">
+                    <label for="product-details">Product details:</label>
+                    <textarea 
+                        id="product-details" 
+                        placeholder="Example: men's cotton t-shirt, black, minimalist design"
+                        rows="4"
+                    ></textarea>
+                    
+                    <div class="options">
+                        <label for="tone">Tone:</label>
+                        <select id="tone">
+                            <option value="persuasive">Persuasive & Professional</option>
+                            <option value="casual">Casual & Friendly</option>
+                            <option value="luxury">Luxury & Premium</option>
+                        </select>
+                    </div>
+
+                    <button id="generate-btn" class="primary-btn">✨ Generate Description</button>
+                </div>
+
+                <!-- Resultado -->
+                <div class="output-section" id="output-section" style="display: none;">
+                    <h3>Your AI-Generated Description:</h3>
+                    <div id="description-output" class="description-box"></div>
+                    
+                    <!-- SEO adicional -->
+                    <div id="seo-section" style="margin-top: 15px; display: none;">
+                        <p><strong>Meta description:</strong> <span id="meta-description"></span></p>
+                        <p><strong>Suggested keywords:</strong> <span id="suggested-keywords"></span></p>
+                    </div>
+                    
+                    <button id="copy-btn" class="secondary-btn">📋 Copy to Clipboard</button>
+                </div>
+
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Creating your description...</p>
+                </div>
+
+                <!-- Upgrade section -->
+                <div id="upgrade-section" class="upgrade-section">
+                    <h3>🚀 Upgrade for more</h3>
+                    <div class="pricing-grid">
+                        <div class="pricing-card pro">
+                            <h4>Pro Plan</h4>
+                            <p class="price">$9.99<span>/month</span></p>
+                            <ul>
+                                <li>✓ 50 descriptions/month</li>
+                                <li>✓ Full history</li>
+                                <li>✓ Email support</li>
+                            </ul>
+                            <button id="checkout-pro" class="pricing-btn pro-btn">Upgrade to Pro</button>
+                        </div>
+                        
+                        <div class="pricing-card business">
+                            <h4>Business Plan</h4>
+                            <p class="price">$29.99<span>/month</span></p>
+                            <ul>
+                                <li>✓ Unlimited descriptions</li>
+                                <li>✓ Full history</li>
+                                <li>✓ Export to CSV</li>
+                                <li>✓ Priority support</li>
+                            </ul>
+                            <button id="checkout-business" class="pricing-btn business-btn">Upgrade to Business</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial -->
+                <div class="history-section" id="history-section">
+                    <h3>Your Recent Descriptions</h3>
+                    <div id="history-list"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>⚡ Powered by AI • Secure payments by Stripe</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
