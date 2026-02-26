@@ -304,56 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-// ============================================
-// EVENTOS DE RECUPERACIÓN DE CONTRASEÑA (CORREGIDO)
-// ============================================
 
-if (forgotPasswordLink) {
-    forgotPasswordLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        // Mostrar el padre (register-section) primero
-        registerSection.style.display = 'block';
-        registerSection.style.visibility = 'visible';
-        registerSection.style.opacity = '1';
-        
-        // Ocultar formularios de login/registro pero mantener el padre visible
-        if (loginForm) loginForm.style.display = 'none';
-        if (registerForm) registerForm.style.display = 'none';
-        
-        // Mostrar la sección de recuperación
-        forgotSection.style.display = 'block';
-        forgotSection.style.visibility = 'visible';
-        forgotSection.style.opacity = '1';
-        
-        // Hacer scroll a la sección
-        forgotSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        console.log('✅ Sección de recuperación activada');
-    });
-}
-
-if (backToLoginLink) {
-    backToLoginLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        
-        // Ocultar sección de recuperación
-        forgotSection.style.display = 'none';
-        
-        // Mostrar formulario de login
-        if (loginForm) loginForm.style.display = 'block';
-        if (registerForm) registerForm.style.display = 'none';
-        
-        // Actualizar pestañas
-        if (loginTab) loginTab.classList.add('active');
-        if (registerTab) registerTab.classList.remove('active');
-        
-        // Ocultar mensajes
-        forgotMessage.style.display = 'none';
-        
-        console.log('✅ Volver a login');
-    });
-}
     // Registro
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -528,23 +479,57 @@ if (backToLoginLink) {
     }
 
     // ============================================
-    // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA
+    // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA (ÚNICO BLOQUE)
     // ============================================
     
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
-            registerSection.style.display = 'none';
+            
+            // Asegurar que el padre sea visible
+            registerSection.style.display = 'block';
+            registerSection.style.visibility = 'visible';
+            registerSection.style.opacity = '1';
+            registerSection.style.height = 'auto';
+            registerSection.style.maxHeight = 'none';
+            
+            // Ocultar formularios específicos
+            if (loginForm) loginForm.style.display = 'none';
+            if (registerForm) registerForm.style.display = 'none';
+            
+            // Mostrar sección de recuperación
             forgotSection.style.display = 'block';
+            forgotSection.style.visibility = 'visible';
+            forgotSection.style.opacity = '1';
+            
+            // Hacer scroll
+            forgotSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            console.log('✅ Sección de recuperación activada');
         });
     }
 
     if (backToLoginLink) {
         backToLoginLink.addEventListener('click', (e) => {
             e.preventDefault();
+            
+            // Ocultar sección de recuperación
             forgotSection.style.display = 'none';
-            registerSection.style.display = 'block';
+            
+            // Mostrar formulario de login
+            if (loginForm) loginForm.style.display = 'block';
+            if (registerForm) registerForm.style.display = 'none';
+            
+            // Actualizar pestañas
+            if (loginTab) {
+                loginTab.classList.add('active');
+                if (registerTab) registerTab.classList.remove('active');
+            }
+            
+            // Ocultar mensajes
             forgotMessage.style.display = 'none';
+            
+            console.log('✅ Volver a login');
         });
     }
 
