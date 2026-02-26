@@ -14,7 +14,7 @@
         </header>
 
         <main>
-            <!-- Sección de login/registro -->
+            <!-- Sección de login/registro/recuperación -->
             <div id="register-section" class="register-section">
                 <div class="auth-tabs">
                     <button class="auth-tab active" id="login-tab">Login</button>
@@ -29,6 +29,11 @@
                     <h2>Welcome Back</h2>
                     <input type="email" id="login-email" placeholder="Your email" required>
                     <input type="password" id="login-password" placeholder="Password" required>
+                    <div style="text-align: right; margin: 10px 0;">
+                        <a href="#" id="forgot-password-link" class="forgot-link">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
                     <button type="submit">Login</button>
                 </form>
                 
@@ -50,6 +55,32 @@
                         <img src="https://www.gstatic.com/firebasejs/auth/ai/svg/google.svg" alt="Google" width="20">
                         Sign in with Google
                     </a>
+                </div>
+                
+                <!-- Sección de recuperación de contraseña (oculta por defecto) -->
+                <div id="forgot-password-section" style="display: none;">
+                    <h2>Recuperar contraseña</h2>
+                    <p>Te enviaremos un enlace a tu email para restablecer tu contraseña.</p>
+                    <form id="forgot-password-form">
+                        <input type="email" id="reset-email" placeholder="Tu email" required>
+                        <button type="submit">Enviar enlace</button>
+                    </form>
+                    <div id="forgot-message" class="message" style="display: none;"></div>
+                    <p style="text-align: center; margin-top: 20px;">
+                        <a href="#" id="back-to-login-link" class="back-link">Volver al inicio de sesión</a>
+                    </p>
+                </div>
+
+                <!-- Sección para establecer nueva contraseña (oculta por defecto) -->
+                <div id="reset-password-section" style="display: none;">
+                    <h2>Establecer nueva contraseña</h2>
+                    <form id="reset-password-form">
+                        <input type="password" id="new-password" placeholder="Nueva contraseña" required minlength="6">
+                        <input type="password" id="confirm-password" placeholder="Confirmar contraseña" required minlength="6">
+                        <input type="hidden" id="reset-token">
+                        <button type="submit">Actualizar contraseña</button>
+                    </form>
+                    <div id="reset-message" class="message" style="display: none;"></div>
                 </div>
                 
                 <!-- Planes -->
