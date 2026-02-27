@@ -116,12 +116,31 @@ function checkUrlParams() {
         window.history.replaceState({}, document.title, '/');
     }
 
-    // Verificar token de reset
+    // Verificar token de reset (esta parte se mantiene por compatibilidad)
     const token = urlParams.get('token');
     if (token && resetToken) {
         resetToken.value = token;
         if (registerSection) registerSection.style.display = 'none';
         if (resetSection) resetSection.style.display = 'block';
+    }
+}
+
+// Función específica para verificar token de recuperación (mejorada)
+function checkResetToken() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    if (token && resetToken) {
+        resetToken.value = token;
+        // Ocultar sección de registro y mostrar reset
+        if (registerSection) registerSection.style.display = 'none';
+        if (resetSection) {
+            resetSection.style.display = 'block';
+            resetSection.style.visibility = 'visible';
+            resetSection.style.opacity = '1';
+        }
+        
+        console.log('✅ Token de recuperación detectado');
     }
 }
 
@@ -223,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // VERIFICAR PARÁMETROS DE URL
     // ============================================
     checkUrlParams();
+    checkResetToken(); // ← NUEVA LÍNEA AGREGADA
 
     // ============================================
     // CARGAR USUARIO GUARDADO
