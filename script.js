@@ -21,6 +21,9 @@ let forgotPasswordLink, backToLoginLink, forgotSection, resetSection;
 let forgotForm, resetForm, resetEmail, newPassword, confirmPassword;
 let resetToken, forgotMessage, resetMessage;
 
+// NUEVO: Elemento para selector de idioma
+let languageSelect;
+
 // ============================================
 // FUNCIONES AUXILIARES (DEBEN IR PRIMERO)
 // ============================================
@@ -349,11 +352,14 @@ document.addEventListener('DOMContentLoaded', function() {
     forgotMessage = document.getElementById('forgot-message');
     resetMessage = document.getElementById('reset-message');
 
+    // NUEVO: Asignar selector de idioma
+    languageSelect = document.getElementById('language');
+
     // ============================================
     // VERIFICAR PARÁMETROS DE URL
     // ============================================
     checkUrlParams();
-    checkResetToken(); // ← LLAMADA A LA NUEVA FUNCIÓN
+    checkResetToken();
 
     // ============================================
     // CARGAR USUARIO GUARDADO
@@ -502,7 +508,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Generar descripción
+    // ============================================
+    // GENERAR DESCRIPCIÓN (VERSIÓN MEJORADA CON IDIOMA)
+    // ============================================
     if (generateBtn) {
         generateBtn.addEventListener('click', async () => {
             const details = productDetails.value.trim();
@@ -522,6 +530,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
+            // Obtener idioma seleccionado (por defecto 'en')
+            const selectedLanguage = languageSelect ? languageSelect.value : 'en';
+            console.log('Idioma seleccionado:', selectedLanguage);
+
             loading.style.display = 'block';
             outputSection.style.display = 'none';
             if (seoSection) seoSection.style.display = 'none';
@@ -534,7 +546,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         user_id: currentUser.id,
                         product_details: details,
                         tone: toneSelect.value,
-                        language: 'en',
+                        language: selectedLanguage, // ← NUEVO: Envía el idioma seleccionado
                         include_seo: true
                     })
                 });
@@ -609,8 +621,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    //_URL}/logout`, { credentials: 'include' }).catch(console.error);
+        });
+    }
+
     // ============================================
     // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA (ÚNICO BLOQUE)
+    // ============================================
+    
+    if (forgotPasswordLink) {
+        forgotPasswordLink.addEventListener('click', (e) ============================================
+    // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA (ÚNICO => {
+            e.preventDefault();
+            
+            // Asegurar que el padre sea visible
+            registerSection.style.display = 'block';
+            registerSection.style.visibility = 'visible';
+            registerSection.style.opacity = '1';
+            registerSection.style.height = 'auto';
+            registerSection.style.maxHeight = 'none';
+            
+            // Ocultar formularios específicos
+            if (loginForm) loginForm.style.display = 'none';
+            if ( BLOQUE)
     // ============================================
     
     if (forgotPasswordLink) {
@@ -633,6 +666,13 @@ document.addEventListener('DOMContentLoaded', function() {
             forgotSection.style.visibility = 'visible';
             forgotSection.style.opacity = '1';
             
+            //registerForm) registerForm.style.display = 'none';
+            
+            // Mostrar sección de recuperación
+            forgotSection.style.display = 'block';
+            forgotSection.style.visibility = 'visible';
+            forgotSection.style.opacity = '1';
+            
             // Hacer scroll
             forgotSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
@@ -649,7 +689,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Mostrar formulario de login
             if (loginForm) loginForm.style.display = 'block';
+            if (registerForm) registerForm.style.display = ' Hacer scroll
+            forgotSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            console.log('✅ Sección de recuperación activada');
+        });
+    }
+
+    if (backToLoginLink) {
+        backToLoginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Ocultar sección de recuperación
+            forgotSection.style.display = 'none';
+            
+            // Mostrar formulario de login
+            if (loginForm) loginForm.style.display = 'block';
             if (registerForm) registerForm.style.display = 'none';
+none';
             
             // Actualizar pestañas
             if (loginTab) {
@@ -682,7 +739,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 forgotMessage.className = 'message ' + (data.success ? 'success' : 'error');
-                forgotMessage.textContent = data.message || data.error;
+                forgotMessage.textContent = data.message ||            
+            // Actualizar pestañas
+            if (loginTab) {
+                loginTab.classList.add('active');
+                if (registerTab) registerTab.classList.remove('active');
+            }
+            
+            // Ocultar mensajes
+            forgotMessage.style.display = 'none';
+            
+            console.log('✅ Volver a login');
+        });
+    }
+
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = resetEmail.value;
+
+            forgotMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_URL}/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const data = await response.json();
+
+                forgotMessage.className = 'message ' + (data.success ? 'success' : 'error');
+                forgotMessage.textContent = data data.error;
                 forgotMessage.style.display = 'block';
 
                 if (data.success) {
