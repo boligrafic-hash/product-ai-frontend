@@ -125,22 +125,133 @@ function checkUrlParams() {
     }
 }
 
-// Función específica para verificar token de recuperación (mejorada)
+// ============================================
+// NUEVA FUNCIÓN DE RECUPERACIÓN (LA QUE FUNCIONÓ)
+// ============================================
 function checkResetToken() {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
     
-    if (token && resetToken) {
-        resetToken.value = token;
-        // Ocultar sección de registro y mostrar reset
-        if (registerSection) registerSection.style.display = 'none';
-        if (resetSection) {
-            resetSection.style.display = 'block';
-            resetSection.style.visibility = 'visible';
-            resetSection.style.opacity = '1';
+    if (token) {
+        console.log('✅ Token de recuperación detectado');
+        
+        // Ocultar la sección de registro
+        if (registerSection) {
+            registerSection.style.display = 'none';
         }
         
-        console.log('✅ Token de recuperación detectado');
+        // Verificar si ya existe una sección de reset y eliminarla
+        const oldResetSection = document.getElementById('reset-password-section');
+        if (oldResetSection) {
+            oldResetSection.remove();
+        }
+        
+        // Crear la nueva sección de reset
+        const newResetSection = document.createElement('div');
+        newResetSection.id = 'reset-password-section';
+        newResetSection.style.cssText = `
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 500px !important;
+            max-width: 90% !important;
+            background: white !important;
+            padding: 40px !important;
+            border-radius: 10px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+            z-index: 999999 !important;
+            border: 5px solid #667eea !important;
+            font-family: Arial, sans-serif !important;
+        `;
+        
+        newResetSection.innerHTML = `
+            <h2 style="color: #333; text-align: center; margin-bottom: 30px; font-size: 24px;">
+                Establecer nueva contraseña
+            </h2>
+            <form id="reset-password-form">
+                <input type="password" id="new-password" placeholder="Nueva contraseña" required 
+                       style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                <input type="password" id="confirm-password" placeholder="Confirmar contraseña" required 
+                       style="width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                <input type="hidden" id="reset-token" value="${token}">
+                <button type="submit" 
+                        style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;">
+                    Actualizar contraseña
+                </button>
+            </form>
+            <div id="reset-message" class="message" style="display: none; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center;"></div>
+        `;
+        
+        // Agregar al body
+        document.body.appendChild(newResetSection);
+        
+        // Reasignar las variables globales
+        resetSection = newResetSection;
+        resetForm = document.getElementById('reset-password-form');
+        newPassword = document.getElementById('new-password');
+        confirmPassword = document.getElementById('confirm-password');
+        resetToken = document.getElementById('reset-token');
+        resetMessage = document.getElementById('reset-message');
+        
+        // Agregar event listener para el formulario
+        if (resetForm) {
+            resetForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const token = resetToken.value;
+                const password = newPassword.value;
+                const confirm = confirmPassword.value;
+
+                if (password !== confirm) {
+                    resetMessage.className = 'message error';
+                    resetMessage.textContent = 'Las contraseñas no coinciden';
+                    resetMessage.style.cssText = 'display: block; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;';
+                    return;
+                }
+
+                resetMessage.style.display = 'none';
+                
+                try {
+                    const response = await fetch(`${API_URL}/update-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token, newPassword: password })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        resetMessage.className = 'message success';
+                        resetMessage.textContent = data.message;
+                        resetMessage.style.cssText = 'display: block; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center; background: #d4edda; color: #155724; border: 1px solid #c3e6cb;';
+                        
+                        newPassword.value = '';
+                        confirmPassword.value = '';
+                        
+                        setTimeout(() => {
+                            newResetSection.remove();
+                            if (registerSection) {
+                                registerSection.style.display = 'block';
+                            }
+                            window.history.replaceState({}, document.title, '/');
+                        }, 3000);
+                    } else {
+                        resetMessage.className = 'message error';
+                        resetMessage.textContent = data.error || 'Error al actualizar la contraseña';
+                        resetMessage.style.cssText = 'display: block; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;';
+                    }
+                } catch (error) {
+                    resetMessage.className = 'message error';
+                    resetMessage.textContent = 'Error al conectar con el servidor';
+                    resetMessage.style.cssText = 'display: block; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center; background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;';
+                    console.error(error);
+                }
+            });
+        }
+        
+        // Hacer scroll
+        newResetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
@@ -242,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // VERIFICAR PARÁMETROS DE URL
     // ============================================
     checkUrlParams();
-    checkResetToken(); // ← NUEVA LÍNEA AGREGADA
+    checkResetToken(); // ← LLAMADA A LA NUEVA FUNCIÓN
 
     // ============================================
     // CARGAR USUARIO GUARDADO
@@ -585,50 +696,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (resetForm) {
-        resetForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const token = resetToken.value;
-            const password = newPassword.value;
-            const confirm = confirmPassword.value;
-
-            if (password !== confirm) {
-                resetMessage.className = 'message error';
-                resetMessage.textContent = 'Las contraseñas no coinciden';
-                resetMessage.style.display = 'block';
-                return;
-            }
-
-            resetMessage.style.display = 'none';
-            
-            try {
-                const response = await fetch(`${API_URL}/update-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token, newPassword: password })
-                });
-
-                const data = await response.json();
-
-                resetMessage.className = 'message ' + (data.success ? 'success' : 'error');
-                resetMessage.textContent = data.message || data.error;
-                resetMessage.style.display = 'block';
-
-                if (data.success) {
-                    newPassword.value = '';
-                    confirmPassword.value = '';
-                    setTimeout(() => {
-                        resetSection.style.display = 'none';
-                        registerSection.style.display = 'block';
-                        window.history.replaceState({}, document.title, '/');
-                    }, 3000);
-                }
-            } catch (error) {
-                resetMessage.className = 'message error';
-                resetMessage.textContent = 'Error al conectar con el servidor';
-                resetMessage.style.display = 'block';
-            }
-        });
-    }
+    // El event listener original de resetForm se elimina porque ahora lo maneja la nueva función
 });
