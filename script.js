@@ -21,14 +21,13 @@ let forgotPasswordLink, backToLoginLink, forgotSection, resetSection;
 let forgotForm, resetForm, resetEmail, newPassword, confirmPassword;
 let resetToken, forgotMessage, resetMessage;
 
-// NUEVO: Elemento para selector de idioma
+// Elemento para selector de idioma
 let languageSelect;
 
 // ============================================
-// FUNCIONES AUXILIARES (DEBEN IR PRIMERO)
+// FUNCIONES AUXILIARES
 // ============================================
 
-// Mostrar mensajes
 function showMessage(text, type = 'info') {
     if (verificationMessage) {
         verificationMessage.style.display = 'block';
@@ -40,7 +39,6 @@ function showMessage(text, type = 'info') {
     }
 }
 
-// Mostrar sección principal
 function showMainSection() {
     if (!registerSection || !mainSection) return;
     
@@ -64,7 +62,6 @@ function showMainSection() {
     }
 }
 
-// Actualizar información del usuario
 function updateUserInfo() {
     if (currentUser && userEmail && userPlan) {
         userEmail.textContent = currentUser.email;
@@ -73,7 +70,6 @@ function updateUserInfo() {
     }
 }
 
-// Actualizar información de uso
 function updateUsageInfo(remaining) {
     if (!currentUser) return;
     
@@ -90,7 +86,6 @@ function updateUsageInfo(remaining) {
     }
 }
 
-// Verificar parámetros de URL
 function checkUrlParams() {
     const urlParams = new URLSearchParams(window.location.search);
     
@@ -119,7 +114,6 @@ function checkUrlParams() {
         window.history.replaceState({}, document.title, '/');
     }
 
-    // Verificar token de reset (esta parte se mantiene por compatibilidad)
     const token = urlParams.get('token');
     if (token && resetToken) {
         resetToken.value = token;
@@ -129,7 +123,7 @@ function checkUrlParams() {
 }
 
 // ============================================
-// NUEVA FUNCIÓN DE RECUPERACIÓN (LA QUE FUNCIONÓ)
+// FUNCIÓN DE RECUPERACIÓN
 // ============================================
 function checkResetToken() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -138,18 +132,15 @@ function checkResetToken() {
     if (token) {
         console.log('✅ Token de recuperación detectado');
         
-        // Ocultar la sección de registro
         if (registerSection) {
             registerSection.style.display = 'none';
         }
         
-        // Verificar si ya existe una sección de reset y eliminarla
         const oldResetSection = document.getElementById('reset-password-section');
         if (oldResetSection) {
             oldResetSection.remove();
         }
         
-        // Crear la nueva sección de reset
         const newResetSection = document.createElement('div');
         newResetSection.id = 'reset-password-section';
         newResetSection.style.cssText = `
@@ -186,10 +177,8 @@ function checkResetToken() {
             <div id="reset-message" class="message" style="display: none; margin-top: 15px; padding: 10px; border-radius: 5px; text-align: center;"></div>
         `;
         
-        // Agregar al body
         document.body.appendChild(newResetSection);
         
-        // Reasignar las variables globales
         resetSection = newResetSection;
         resetForm = document.getElementById('reset-password-form');
         newPassword = document.getElementById('new-password');
@@ -197,7 +186,6 @@ function checkResetToken() {
         resetToken = document.getElementById('reset-token');
         resetMessage = document.getElementById('reset-message');
         
-        // Agregar event listener para el formulario
         if (resetForm) {
             resetForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -253,12 +241,13 @@ function checkResetToken() {
             });
         }
         
-        // Hacer scroll
         newResetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
 
-// Cargar historial
+// ============================================
+// FUNCIONES DE HISTORIAL
+// ============================================
 async function loadHistory() {
     if (!currentUser) return;
 
@@ -298,13 +287,11 @@ function displayHistory(descriptions) {
 }
 
 // ============================================
-// INICIALIZACIÓN (DESPUÉS DE QUE EL DOM CARGUE)
+// INICIALIZACIÓN
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
     
-    // ============================================
-    // ASIGNAR ELEMENTOS DOM
-    // ============================================
+    // Asignar elementos DOM
     registerSection = document.getElementById('register-section');
     mainSection = document.getElementById('main-section');
     loginTab = document.getElementById('login-tab');
@@ -352,18 +339,14 @@ document.addEventListener('DOMContentLoaded', function() {
     forgotMessage = document.getElementById('forgot-message');
     resetMessage = document.getElementById('reset-message');
 
-    // NUEVO: Asignar selector de idioma
+    // Selector de idioma
     languageSelect = document.getElementById('language');
 
-    // ============================================
-    // VERIFICAR PARÁMETROS DE URL
-    // ============================================
+    // Verificar parámetros de URL
     checkUrlParams();
     checkResetToken();
 
-    // ============================================
-    // CARGAR USUARIO GUARDADO
-    // ============================================
+    // Cargar usuario guardado
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
         try {
@@ -508,9 +491,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ============================================
-    // GENERAR DESCRIPCIÓN (VERSIÓN MEJORADA CON IDIOMA)
-    // ============================================
+    // Generar descripción
     if (generateBtn) {
         generateBtn.addEventListener('click', async () => {
             const details = productDetails.value.trim();
@@ -530,7 +511,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // Obtener idioma seleccionado (por defecto 'en')
             const selectedLanguage = languageSelect ? languageSelect.value : 'en';
             console.log('Idioma seleccionado:', selectedLanguage);
 
@@ -546,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         user_id: currentUser.id,
                         product_details: details,
                         tone: toneSelect.value,
-                        language: selectedLanguage, // ← NUEVO: Envía el idioma seleccionado
+                        language: selectedLanguage,
                         include_seo: true
                     })
                 });
@@ -621,59 +601,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    //_URL}/logout`, { credentials: 'include' }).catch(console.error);
-        });
-    }
-
     // ============================================
-    // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA (ÚNICO BLOQUE)
-    // ============================================
-    
-    if (forgotPasswordLink) {
-        forgotPasswordLink.addEventListener('click', (e) ============================================
-    // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA (ÚNICO => {
-            e.preventDefault();
-            
-            // Asegurar que el padre sea visible
-            registerSection.style.display = 'block';
-            registerSection.style.visibility = 'visible';
-            registerSection.style.opacity = '1';
-            registerSection.style.height = 'auto';
-            registerSection.style.maxHeight = 'none';
-            
-            // Ocultar formularios específicos
-            if (loginForm) loginForm.style.display = 'none';
-            if ( BLOQUE)
+    // EVENTOS DE RECUPERACIÓN DE CONTRASEÑA
     // ============================================
     
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Asegurar que el padre sea visible
             registerSection.style.display = 'block';
             registerSection.style.visibility = 'visible';
             registerSection.style.opacity = '1';
             registerSection.style.height = 'auto';
             registerSection.style.maxHeight = 'none';
             
-            // Ocultar formularios específicos
             if (loginForm) loginForm.style.display = 'none';
             if (registerForm) registerForm.style.display = 'none';
             
-            // Mostrar sección de recuperación
             forgotSection.style.display = 'block';
             forgotSection.style.visibility = 'visible';
             forgotSection.style.opacity = '1';
             
-            //registerForm) registerForm.style.display = 'none';
-            
-            // Mostrar sección de recuperación
-            forgotSection.style.display = 'block';
-            forgotSection.style.visibility = 'visible';
-            forgotSection.style.opacity = '1';
-            
-            // Hacer scroll
             forgotSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             console.log('✅ Sección de recuperación activada');
@@ -684,69 +632,16 @@ document.addEventListener('DOMContentLoaded', function() {
         backToLoginLink.addEventListener('click', (e) => {
             e.preventDefault();
             
-            // Ocultar sección de recuperación
             forgotSection.style.display = 'none';
             
-            // Mostrar formulario de login
-            if (loginForm) loginForm.style.display = 'block';
-            if (registerForm) registerForm.style.display = ' Hacer scroll
-            forgotSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            console.log('✅ Sección de recuperación activada');
-        });
-    }
-
-    if (backToLoginLink) {
-        backToLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // Ocultar sección de recuperación
-            forgotSection.style.display = 'none';
-            
-            // Mostrar formulario de login
             if (loginForm) loginForm.style.display = 'block';
             if (registerForm) registerForm.style.display = 'none';
-none';
             
-            // Actualizar pestañas
             if (loginTab) {
                 loginTab.classList.add('active');
                 if (registerTab) registerTab.classList.remove('active');
             }
             
-            // Ocultar mensajes
-            forgotMessage.style.display = 'none';
-            
-            console.log('✅ Volver a login');
-        });
-    }
-
-    if (forgotForm) {
-        forgotForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = resetEmail.value;
-
-            forgotMessage.style.display = 'none';
-            
-            try {
-                const response = await fetch(`${API_URL}/forgot-password`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
-                });
-
-                const data = await response.json();
-
-                forgotMessage.className = 'message ' + (data.success ? 'success' : 'error');
-                forgotMessage.textContent = data.message ||            
-            // Actualizar pestañas
-            if (loginTab) {
-                loginTab.classList.add('active');
-                if (registerTab) registerTab.classList.remove('active');
-            }
-            
-            // Ocultar mensajes
             forgotMessage.style.display = 'none';
             
             console.log('✅ Volver a login');
@@ -785,6 +680,4 @@ none';
         });
     }
 
-}); // ← ESTA ES LA ÚNICA LLAVE DE CIERRE DEL DOMContentLoaded
-    // El event listener original de resetForm se elimina porque ahora lo maneja la nueva función
-});
+}); // ← FINAL DE DOMContentLoaded
