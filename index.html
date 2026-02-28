@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Product Description Generator</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="csstyles.css">
 </head>
 <body>
     <div class="container">
@@ -166,7 +166,14 @@
                             <option value="luxury">Luxury & Premium</option>
                         </select>
                     </div>
-
+<!-- Dentro de la sección principal, antes del botón Generate -->
+<div class="language-selector" style="margin: 15px 0;">
+    <label for="language">Language / Idioma:</label>
+    <select id="language">
+        <option value="en" selected>🇺🇸 English (US)</option>
+        <option value="es">🇪🇸 Español</option>
+    </select>
+</div>
                     <button id="generate-btn" class="primary-btn">✨ Generate Description</button>
                 </div>
 

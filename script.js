@@ -771,7 +771,7 @@ none';
                 const data = await response.json();
 
                 forgotMessage.className = 'message ' + (data.success ? 'success' : 'error');
-                forgotMessage.textContent = data data.error;
+                forgotMessage.textContent = data.message || data.error;
                 forgotMessage.style.display = 'block';
 
                 if (data.success) {
@@ -785,5 +785,6 @@ none';
         });
     }
 
+}); // ← ESTA ES LA ÚNICA LLAVE DE CIERRE DEL DOMContentLoaded
     // El event listener original de resetForm se elimina porque ahora lo maneja la nueva función
 });
