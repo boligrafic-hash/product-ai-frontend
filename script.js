@@ -246,20 +246,110 @@ function checkResetToken() {
 }
 
 // ============================================
-// FUNCIONES DE HISTORIAL
+// FUNCIONES DE HISTORIAL (MODIFICADAS)
 // ============================================
+
+// 🔹 NUEVA: Cargar historial desde localStorage
+function loadHistoryFromLocalStorage() {
+    if (!currentUser) return;
+    
+    console.log('📁 Cargando historial desde localStorage');
+    
+    try {
+        // Crear clave única para este usuario
+        const storageKey = `history_${currentUser.id}`;
+        
+        // Obtener historial guardado
+        const savedHistory = localStorage.getItem(storageKey);
+        
+        // Convertir de JSON a objeto (o array vacío si no hay)
+        const descriptions = savedHistory ? JSON.parse(savedHistory) : [];
+        
+        console.log(`📊 Encontradas ${descriptions.length} descripciones guardadas`);
+        
+        // Mostrar el historial
+        displayHistory(descriptions);
+        
+        // Actualizar contador basado en localStorage
+        const limits = { free: 5, pro: 50, business: 1000 };
+        const limit = limits[currentUser.plan] || 5;
+        const used = descriptions.length;
+        updateUsageInfo(limit - used);
+        
+    } catch (error) {
+        console.error('Error cargando historial local:', error);
+        if (historyList) {
+            historyList.innerHTML = '<p>No descriptions yet. Generate your first one!</p>';
+        }
+    }
+}
+
+// 🔹 NUEVA: Guardar una descripción en localStorage
+function saveDescriptionToLocalStorage(description) {
+    if (!currentUser) return;
+    
+    try {
+        const storageKey = `history_${currentUser.id}`;
+        const existing = localStorage.getItem(storageKey);
+        const history = existing ? JSON.parse(existing) : [];
+        
+        // Añadir nueva descripción al principio
+        history.unshift(description);
+        
+        // Limitar a 50 descripciones máximo
+        if (history.length > 50) history.pop();
+        
+        // Guardar en localStorage
+        localStorage.setItem(storageKey, JSON.stringify(history));
+        
+        console.log('💾 Descripción guardada localmente');
+        
+        // Actualizar vista
+        displayHistory(history);
+        
+        // Actualizar contador
+        const limits = { free: 5, pro: 50, business: 1000 };
+        const limit = limits[currentUser.plan] || 5;
+        updateUsageInfo(limit - history.length);
+        
+    } catch (error) {
+        console.error('Error guardando descripción:', error);
+    }
+}
+
+// 🔹 MODIFICADA: loadHistory con soporte para localStorage
 async function loadHistory() {
     if (!currentUser) return;
 
     try {
+        console.log('🌐 Intentando cargar historial del backend...');
         const response = await fetch(`${API_URL}/my-descriptions/${currentUser.id}`);
+        
+        // Verificar si la respuesta es JSON
+        const contentType = response.headers.get('content-type');
+        
+        if (!contentType || !contentType.includes('application/json')) {
+            console.log('⚠️ Backend no devolvió JSON, usando localStorage');
+            // Usar respaldo local
+            loadHistoryFromLocalStorage();
+            return;
+        }
+
+        // Si llegamos aquí, sí es JSON
         const data = await response.json();
 
         if (data.success) {
+            console.log('✅ Historial cargado del backend');
             displayHistory(data.descriptions);
+            
+            // También guardar copia en localStorage
+            const storageKey = `history_${currentUser.id}`;
+            localStorage.setItem(storageKey, JSON.stringify(data.descriptions));
         }
     } catch (error) {
-        console.error('Error loading history:', error);
+        console.error('Error cargando historial del backend:', error);
+        // Si hay error, usar localStorage
+        loadHistoryFromLocalStorage();
     }
 }
 
@@ -352,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             currentUser = JSON.parse(savedUser);
             showMainSection();
-            loadHistory();
+            loadHistory(); // Ahora usa la versión mejorada
         } catch (e) {
             console.error('Error parsing saved user:', e);
             localStorage.removeItem('user');
@@ -406,7 +496,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     };
                     localStorage.setItem('user', JSON.stringify(currentUser));
                     showMainSection();
-                    loadHistory();
+                    loadHistory(); // Usa la versión mejorada
                 } else {
                     if (data.needs_verification) {
                         if (verificationPending) {
@@ -491,7 +581,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Generar descripción
+    // Generar descripción (MODIFICADO para guardar en localStorage)
     if (generateBtn) {
         generateBtn.addEventListener('click', async () => {
             const details = productDetails.value.trim();
@@ -551,6 +641,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateUsageInfo(data.remaining);
                     }
                     
+                    // 🔹 NUEVO: Guardar en localStorage
+                    const newDescription = {
+                        product_details: details,
+                        generated_description: data.description,
+                        created_at: new Date().toISOString()
+                    };
+                    saveDescriptionToLocalStorage(newDescription);
+                    
+                    // Intentar cargar del backend (fallback a localStorage)
                     loadHistory();
                 } else {
                     if (data.error && data.error.includes('Límite')) {
@@ -578,11 +677,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Cerrar sesión
+    // Cerrar sesión (MODIFICADO para limpiar localStorage del historial)
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
+            // Guardar el ID antes de borrar currentUser
+            const userId = currentUser?.id;
+            
             currentUser = null;
             localStorage.removeItem('user');
+            
+            // Opcional: NO borrar el historial localStorage para mantenerlo al next login
+            // Si quieres borrarlo, descomenta esta línea:
+            // if (userId) localStorage.removeItem(`history_${userId}`);
+            
             registerSection.style.display = 'block';
             mainSection.style.display = 'none';
             
